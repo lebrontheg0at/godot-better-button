@@ -1,7 +1,15 @@
-# 更好的按钮（BetterGodotButton）— AI Agent 使用指南
+# 更好的按钮（godot_better_button）— AI Agent 使用指南
+
+> 本仓库含**两个插件版本**，行为一致仅语言不同：`better_godot_button`（英文版，属性/分组全英文，自定义类型 Better Button）与 `better_godot_button_zh`（中文版，自定义类型 更好的按钮）。让 AI 用哪个版本，就让它把对应文件夹的脚本当作路径基准。本指南以中文版为例，英文版差异仅是标识符英文化。
 
 > 本文档面向 AI Agent（Claude/Codex/Copilot 等），供你在 Godot 4.5 项目中正确使用/修改本插件。
 > 人类开发者也可阅读，但内容按"agent 需要知道什么"组织。
+
+## 版本选择
+
+- 英文版 `better_godot_button/`：注册类型 `Better Button`，检查器全英文
+- 中文版 `better_godot_button_zh/`：注册类型 `更好的按钮`，检查器中文
+- 只安装其一；两版 `.tscn` 属性键不同（英文版用 `normal_texture` 等，中文版用 `常规纹理` 等）
 
 ## 插件是什么
 
@@ -103,10 +111,6 @@ script = ExtResource("2_afd")
 - `_播放缩放动画(目标大小, 时长, 缓动, 过渡)`：状态型缩放
 - `_刷新纹理/_刷新层/_刷新阴影/_构建纹理层/_构建文本`：构建与刷新
 - 信号连接在 `_ready` 且运行时才连（`Engine.is_editor_hint()` 守卫），编辑器里不会误触发
-
-## 语言切换
-
-项目设置 `better_button/language`：`zh`（默认中文）/ `en`（English）。当前切换新建节点菜单里的类型名（更好的按钮 / Better Button）；导出属性名是存储标识符，无法动态切换语言。动画配置/纹理层脚本路径已全部英文化，在 .tscn 中引用时用 animations/ 下的英文文件名。
 
 ## 设计约定
 
