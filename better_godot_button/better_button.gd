@@ -420,8 +420,7 @@ func _build_texture_layers() -> void:
 			sprite.set_meta("plugin_created", true)
 			# Internal node: hidden from the scene dock, fully managed by the plugin
 			add_child(sprite, false, Node.INTERNAL_MODE_BACK)
-			if Engine.is_editor_hint():
-				sprite.owner = get_tree().edited_scene_root
+
 		_layer_sprites.append(sprite)
 	# Reconnect signals each build so newly added layers refresh live
 	for cfg in texture_layers:
@@ -440,8 +439,7 @@ func _build_shadow() -> void:
 	sprite.set_meta("plugin_created", true)
 	# Internal node + FRONT: drawn first, behind all layers
 	add_child(sprite, false, Node.INTERNAL_MODE_FRONT)
-	if Engine.is_editor_hint():
-		sprite.owner = get_tree().edited_scene_root
+
 	_shadow_sprite = sprite
 	_update_shadow()
 	# Sync the shadow texture on first build (later handled by _refresh_textures following the first layer)
@@ -481,8 +479,7 @@ func _build_text() -> void:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		add_child(label, false, Node.INTERNAL_MODE_BACK)
-		if Engine.is_editor_hint():
-			label.owner = get_tree().edited_scene_root
+
 		_text_label = label
 		_apply_text_style()
 	if _text_label:

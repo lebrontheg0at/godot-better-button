@@ -420,8 +420,7 @@ func _构建纹理层() -> void:
 			图案.set_meta("plugin_created", true)
 			# 内部节点：不在场景树面板显示，由插件全权管理
 			add_child(图案, false, Node.INTERNAL_MODE_BACK)
-			if Engine.is_editor_hint():
-				图案.owner = get_tree().edited_scene_root
+
 		_层图案.append(图案)
 	# 每次构建时重连信号，保证检查器里新添加的层也能实时刷新
 	for 配置 in 纹理层列表:
@@ -440,8 +439,7 @@ func _构建快捷阴影() -> void:
 	图案.set_meta("plugin_created", true)
 	# 内部节点 + FRONT：排在最前，垫在所有层底下
 	add_child(图案, false, Node.INTERNAL_MODE_FRONT)
-	if Engine.is_editor_hint():
-		图案.owner = get_tree().edited_scene_root
+
 	_阴影图案 = 图案
 	_刷新阴影()
 	# 首次构建时同步阴影纹理（之后由 _刷新纹理 跟随首层切换）
@@ -481,8 +479,7 @@ func _构建文本() -> void:
 		标签.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		标签.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		add_child(标签, false, Node.INTERNAL_MODE_BACK)
-		if Engine.is_editor_hint():
-			标签.owner = get_tree().edited_scene_root
+
 		_文本标签 = 标签
 		_更新文本样式()
 	if _文本标签:
