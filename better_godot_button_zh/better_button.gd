@@ -10,14 +10,6 @@ class_name 更好的按钮
 # 着色器：可选 shader，悬停时把鼠标位置写入指定 uniform
 # 音效：优先用拖入的音频文件，留空则回退到 音效 自动加载节点（不存在时静默跳过）
 
-# 插件语言选项 lang：中文 / English（写入项目设置 better_button/language，切换后重启编辑器生效）
-@export_enum("中文", "English") var lang: String = "中文":
-	set(值):
-		lang = 值
-		if Engine.is_editor_hint():
-			ProjectSettings.set_setting("better_button/language", "zh" if 值 == "中文" else "en")
-			ProjectSettings.save()
-
 @export_group("纹理")
 # 默认的第一层（垫底）：拖入常规纹理即生效，悬停/按下纹理可选；追加层请用纹理层列表
 @export var 常规纹理: Texture2D = null:
@@ -204,9 +196,9 @@ var _闪烁动画: Tween = null
 
 const 预设着色器列表: Array[Shader] = [
 	null,
-	preload("res://addons/better_godot_button/shader/preview_3d.gdshader"),
+	preload("shader/preview_3d.gdshader"),
 ]
-const 描边着色器: Shader = preload("res://addons/better_godot_button/shader/outline.gdshader")
+const 描边着色器: Shader = preload("shader/outline.gdshader")
 
 
 func _ready() -> void:
