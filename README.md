@@ -1,6 +1,6 @@
-# godot_better_button | 更好的按钮
+# godot_better_button
 
-Two Godot 4.5 editor plugins (English + 中文) providing **Better Button / 更好的按钮** — a multi-texture composite button where every visual, animation, and sound is an optional inspector setting. Stop hand-writing "Button + Normal/Pressed/Shadow Sprite2D children + hover-scale script" boilerplate.
+Two Godot 4.5 editor plugins (an English one and a Chinese one) providing **Better Button** — a multi-texture composite button where every visual, animation, and sound is an optional inspector setting. Stop hand-writing "Button + Normal/Pressed/Shadow Sprite2D children + hover-scale script" boilerplate.
 
 This repository ships **two plugin folders**, identical in behavior, differing only in language:
 
