@@ -9,6 +9,12 @@ class_name BetterButton
 # Shaders: optional — mouse position is written to a uniform while hovered.
 # Sounds: audio slots take priority, otherwise they fall back to the autoload node /root/音效.
 
+# Toggle mode: the button switches on/off on each click
+@export var toggle_switch: bool = false:
+	set(value):
+		toggle_switch = value
+		toggle_mode = value
+
 @export_group("Texture")
 # Base layer (bottom): drop a normal texture to make it work; hover/pressed are optional
 @export var normal_texture: Texture2D = null:
@@ -204,7 +210,11 @@ func _ready() -> void:
 	_base_scale = scale
 	_origin_pos = position
 	pivot_offset = size / 2.0
-	resized.connect(func(): pivot_offset = size / 2.0)
+	resized.connect(func():
+		pivot_offset = size / 2.0
+		_reset_text_rect()
+		_reset_layer_offset()
+	)
 	_init_animations()
 	_build_texture_layers()
 	_build_text()
@@ -457,6 +467,16 @@ func _update_shadow() -> void:
 	_shadow_sprite.position = cfg.offset + shadow_offset
 
 
+func _reset_layer_offset() -> void:
+	# The base layer is centered on the button; size may still be 0 during _ready, so the offset
+	# baked from a zero rect has to be recomputed whenever the size changes
+	if _base_layer == null or size == Vector2.ZERO:
+		return
+	_base_layer.offset = size / 2.0
+	_refresh_layers()
+	_update_shadow()
+
+
 func _find_layer(name: String) -> Sprite2D:
 	for child in get_children(true):
 		if child is Sprite2D and child.name == name and not child.has_meta("plugin_created"):
@@ -475,16 +495,31 @@ func _build_text() -> void:
 		var label := Label.new()
 		label.name = text_node_name
 		label.set_meta("plugin_created", true)
-		label.set_anchors_preset(Control.PRESET_FULL_RECT)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		add_child(label, false, Node.INTERNAL_MODE_BACK)
 
 		_text_label = label
 		_apply_text_style()
 	if _text_label:
-		_text_origin = _text_label.position
-		_update_text_position()
+		_reset_text_rect()
+
+
+func _reset_text_rect() -> void:
+	# Fill the button and center the text; reused scene nodes are normalized the same way
+	# The offsets must be zeroed explicitly: the button may still be 0x0 during _ready, and when
+	# the parent is smaller than the Label's minimum size Godot bakes that minimum into the
+	# offsets and never recovers, so any size change has to redo this
+	if _text_label == null or not is_instance_valid(_text_label):
+		return
+	_text_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_text_label.offset_left = 0.0
+	_text_label.offset_top = 0.0
+	_text_label.offset_right = 0.0
+	_text_label.offset_bottom = 0.0
+	_text_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_text_label.z_index = 1
+	_text_origin = _text_label.position
+	_update_text_position()
 
 
 func _update_text_position() -> void:

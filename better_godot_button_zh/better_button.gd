@@ -10,6 +10,12 @@ class_name 更好的按钮
 # 着色器：可选 shader，悬停时把鼠标位置写入指定 uniform
 # 音效：优先用拖入的音频文件，留空则回退到 音效 自动加载节点（不存在时静默跳过）
 
+# 开关模式：按钮变为切换式（点一下开、再点一下关）
+@export var 开关模式: bool = false:
+	set(值):
+		开关模式 = 值
+		toggle_mode = 值
+
 @export_group("纹理")
 # 默认的第一层（垫底）：拖入常规纹理即生效，悬停/按下纹理可选；追加层请用纹理层列表
 @export var 常规纹理: Texture2D = null:
@@ -205,7 +211,11 @@ func _ready() -> void:
 	_原始大小 = scale
 	_原始位置 = position
 	pivot_offset = size / 2.0
-	resized.connect(func(): pivot_offset = size / 2.0)
+	resized.connect(func():
+		pivot_offset = size / 2.0
+		_复位文本矩形()
+		_复位图案位置()
+	)
 	_初始化动画配置()
 	_构建纹理层()
 	_构建文本()
@@ -457,6 +467,15 @@ func _刷新阴影() -> void:
 	_阴影图案.position = 配置.偏移 + 阴影偏移
 
 
+func _复位图案位置() -> void:
+	# 基础层默认居中于按钮；_ready 时 size 可能还是 0，那时算出的偏移是错的，尺寸一变就重算
+	if _基础配置 == null or size == Vector2.ZERO:
+		return
+	_基础配置.偏移 = size / 2.0
+	_刷新层()
+	_刷新阴影()
+
+
 func _查找子层(名字: String) -> Sprite2D:
 	for 子节点 in get_children(true):
 		if 子节点 is Sprite2D and 子节点.name == 名字 and not 子节点.has_meta("plugin_created"):
@@ -475,16 +494,30 @@ func _构建文本() -> void:
 		var 标签 := Label.new()
 		标签.name = 文本节点名
 		标签.set_meta("plugin_created", true)
-		标签.set_anchors_preset(Control.PRESET_FULL_RECT)
-		标签.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		标签.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		add_child(标签, false, Node.INTERNAL_MODE_BACK)
 
 		_文本标签 = 标签
 		_更新文本样式()
 	if _文本标签:
-		_文本原始位置 = _文本标签.position
-		_刷新文本位置()
+		_复位文本矩形()
+
+
+func _复位文本矩形() -> void:
+	# 铺满按钮并居中，复用的场景节点同样归一
+	# offsets 必须显式归零：_ready 时按钮可能还是 0×0，而父节点小于 Label 最小尺寸时
+	# Godot 会把最小尺寸钳进 offsets 且之后不会自行恢复，所以尺寸一变就得重来
+	if _文本标签 == null or not is_instance_valid(_文本标签):
+		return
+	_文本标签.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_文本标签.offset_left = 0.0
+	_文本标签.offset_top = 0.0
+	_文本标签.offset_right = 0.0
+	_文本标签.offset_bottom = 0.0
+	_文本标签.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_文本标签.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_文本标签.z_index = 1
+	_文本原始位置 = _文本标签.position
+	_刷新文本位置()
 
 
 func _刷新文本位置() -> void:
@@ -537,14 +570,14 @@ func _当前着色器() -> Shader:
 func _更新描边显示() -> void:
 	for 图案 in _层图案:
 		if 图案.material is ShaderMaterial:
-			图案.material.set_shader_parameter("显示描边", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
+			图案.material.set_shader_parameter("show_outline", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
 
 
 func _更新描边参数() -> void:
 	for 图案 in _层图案:
 		if 图案.material is ShaderMaterial:
-			图案.material.set_shader_parameter("描边颜色", 描边颜色)
-			图案.material.set_shader_parameter("描边宽度", 描边宽度)
+			图案.material.set_shader_parameter("outline_color", 描边颜色)
+			图案.material.set_shader_parameter("outline_width", 描边宽度)
 
 
 func _刷新层() -> void:
@@ -561,9 +594,9 @@ func _刷新层() -> void:
 		if 着色器:
 			var 材质 := ShaderMaterial.new()
 			材质.shader = 着色器
-			材质.set_shader_parameter("描边颜色", 描边颜色)
-			材质.set_shader_parameter("描边宽度", 描边宽度)
-			材质.set_shader_parameter("显示描边", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
+			材质.set_shader_parameter("outline_color", 描边颜色)
+			材质.set_shader_parameter("outline_width", 描边宽度)
+			材质.set_shader_parameter("show_outline", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
 			图案.material = 材质
 	_刷新纹理()
 	_刷新阴影()
