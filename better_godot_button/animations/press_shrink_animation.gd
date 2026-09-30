@@ -1,3 +1,4 @@
+# uid-marker: en-pressshrink
 @tool
 extends ButtonAnimation
 class_name PressShrinkAnimation

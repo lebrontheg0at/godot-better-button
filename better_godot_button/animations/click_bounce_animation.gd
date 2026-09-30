@@ -1,3 +1,4 @@
+# uid-marker: en-clickbounce
 @tool
 extends ButtonAnimation
 class_name ClickBounceAnimation

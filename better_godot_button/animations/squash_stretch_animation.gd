@@ -1,3 +1,4 @@
+# uid-marker: en-squash
 @tool
 extends ButtonAnimation
 class_name SquashStretchAnimation

@@ -1,3 +1,4 @@
+# uid-marker: en-heartbeat
 @tool
 extends ButtonAnimation
 class_name HeartbeatAnimation

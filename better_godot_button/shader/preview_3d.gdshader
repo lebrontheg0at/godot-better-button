@@ -1,3 +1,4 @@
+// uid-marker: en-preview3d
 shader_type canvas_item;
 
 //3D效果调控开关

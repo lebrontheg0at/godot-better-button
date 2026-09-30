@@ -1,3 +1,4 @@
+# uid-marker: en-core
 @tool
 extends Button
 class_name BetterButton

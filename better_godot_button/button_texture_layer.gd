@@ -1,3 +1,4 @@
+# uid-marker: en-texlayer
 @tool
 extends Resource
 class_name ButtonTextureLayer

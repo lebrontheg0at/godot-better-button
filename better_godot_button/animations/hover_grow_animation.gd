@@ -1,3 +1,4 @@
+# uid-marker: en-hovergrow
 @tool
 extends ButtonAnimation
 class_name HoverGrowAnimation

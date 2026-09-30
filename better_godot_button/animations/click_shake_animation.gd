@@ -1,3 +1,4 @@
+# uid-marker: en-clickshake
 @tool
 extends ButtonAnimation
 class_name ClickShakeAnimation

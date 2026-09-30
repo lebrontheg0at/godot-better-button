@@ -1,3 +1,4 @@
+# uid-marker: en-sink
 @tool
 extends ButtonAnimation
 class_name SinkAnimation

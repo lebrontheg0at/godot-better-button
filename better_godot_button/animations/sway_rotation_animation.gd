@@ -1,3 +1,4 @@
+# uid-marker: en-swayrot
 @tool
 extends ButtonAnimation
 class_name SwayRotationAnimation

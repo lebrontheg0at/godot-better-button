@@ -1,3 +1,4 @@
+# uid-marker: en-nod
 @tool
 extends ButtonAnimation
 class_name NodAnimation

@@ -1,3 +1,4 @@
+# uid-marker: en-blink
 @tool
 extends ButtonAnimation
 class_name BlinkAnimation

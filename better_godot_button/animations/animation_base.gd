@@ -1,3 +1,4 @@
+# uid-marker: en-base
 @tool
 extends Resource
 class_name ButtonAnimation

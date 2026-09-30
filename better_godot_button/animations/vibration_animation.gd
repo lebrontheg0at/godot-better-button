@@ -1,3 +1,4 @@
+# uid-marker: en-vibration
 @tool
 extends ButtonAnimation
 class_name VibrationAnimation

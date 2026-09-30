@@ -1,3 +1,4 @@
+// uid-marker: en-outline
 shader_type canvas_item;
 
 // 纹理描边：沿纹理透明边缘生成一圈描边

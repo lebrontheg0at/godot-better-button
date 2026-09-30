@@ -1,3 +1,4 @@
+# uid-marker: en-hopoffset
 @tool
 extends ButtonAnimation
 class_name HopOffsetAnimation

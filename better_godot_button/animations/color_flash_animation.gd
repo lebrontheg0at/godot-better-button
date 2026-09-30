@@ -1,3 +1,4 @@
+# uid-marker: en-colorflash
 @tool
 extends ButtonAnimation
 class_name ColorFlashAnimation

@@ -1,3 +1,4 @@
+# uid-marker: en-swayoffset
 @tool
 extends ButtonAnimation
 class_name SwayOffsetAnimation

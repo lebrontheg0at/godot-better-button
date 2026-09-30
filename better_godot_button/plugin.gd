@@ -1,3 +1,4 @@
+# uid-marker: en-plugin
 @tool
 extends EditorPlugin
 
