@@ -85,8 +85,9 @@ class_name 更好的按钮
 @export var 文本内容: String = "":
 	set(值):
 		文本内容 = 值
-		if _文本标签 and is_instance_valid(_文本标签):
-			_文本标签.text = 值
+		# Label 不存在时也会自动补建，无需再开关一次自动创建文本
+		if is_inside_tree():
+			_构建文本()
 @export var 文本字体: Font = null:
 	set(值):
 		文本字体 = 值

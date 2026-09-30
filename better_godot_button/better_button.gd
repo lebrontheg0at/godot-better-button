@@ -84,8 +84,9 @@ class_name BetterButton
 @export var text_content: String = "":
 	set(value):
 		text_content = value
-		if _text_label and is_instance_valid(_text_label):
-			_text_label.text = value
+		# Creates the label too when missing — no need to re-toggle auto_create_text
+		if is_inside_tree():
+			_build_text()
 @export var text_font: Font = null:
 	set(value):
 		text_font = value
