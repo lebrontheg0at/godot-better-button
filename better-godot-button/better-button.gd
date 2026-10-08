@@ -203,7 +203,7 @@ var _fade_tween: Tween = null
 
 const preset_shader_list: Array[Shader] = [
 	null,
-	preload("shader/preview_3d.gdshader"),
+	preload("shader/preview-3d.gdshader"),
 ]
 const outline_shader: Shader = preload("shader/outline.gdshader")
 

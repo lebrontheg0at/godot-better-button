@@ -203,7 +203,7 @@ var _闪烁动画: Tween = null
 
 const 预设着色器列表: Array[Shader] = [
 	null,
-	preload("shader/preview_3d.gdshader"),
+	preload("shader/preview-3d.gdshader"),
 ]
 const 描边着色器: Shader = preload("shader/outline.gdshader")
 

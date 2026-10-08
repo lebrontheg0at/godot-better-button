@@ -1,39 +1,39 @@
-# 更好的按钮（godot_better_button）— AI Agent 使用指南
+# 更好的按钮（godot-better-button）— AI Agent 使用指南
 
-> 本仓库含**两个插件版本**，行为一致仅语言不同：`better_godot_button`（英文版，属性/分组全英文，自定义类型 Better Button）与 `better_godot_button_zh`（中文版，自定义类型 更好的按钮）。让 AI 用哪个版本，就让它把对应文件夹的脚本当作路径基准。本指南以中文版为例，英文版差异仅是标识符英文化。
+> 本仓库含**两个插件版本**，行为一致仅语言不同：`better-godot-button`（英文版，属性/分组全英文，自定义类型 Better Button）与 `better-godot-button-zh`（中文版，自定义类型 更好的按钮）。让 AI 用哪个版本，就让它把对应文件夹的脚本当作路径基准。本指南以中文版为例，英文版差异仅是标识符英文化。
 
 > 本文档面向 AI Agent（Claude/Codex/Copilot 等），供你在 Godot 4.5 项目中正确使用/修改本插件。
 > 人类开发者也可阅读，但内容按"agent 需要知道什么"组织。
 
 ## 版本选择
 
-- 英文版 `better_godot_button/`：注册类型 `Better Button`，检查器全英文
-- 中文版 `better_godot_button_zh/`：注册类型 `更好的按钮`，检查器中文
+- 英文版 `better-godot-button/`：注册类型 `Better Button`，检查器全英文
+- 中文版 `better-godot-button-zh/`：注册类型 `更好的按钮`，检查器中文
 - 只安装其一；两版 `.tscn` 属性键不同（英文版用 `normal_texture` 等，中文版用 `常规纹理` 等）
 
 ## 插件是什么
 
-`better_godot_button` 是一个 Godot 4.5 编辑器插件，提供 `更好的按钮`（脚本类名 `更好的按钮`，基类 `Button`）——一个多层纹理复合按钮，所有视觉/音效/动画均为可配置选项。设计目标是让项目里不再手写"Button + 正常/按下/阴影 Sprite2D 子节点 + 悬浮缩放脚本"这种样板。
+`better-godot-button` 是一个 Godot 4.5 编辑器插件，提供 `更好的按钮`（脚本类名 `更好的按钮`，基类 `Button`）——一个多层纹理复合按钮，所有视觉/音效/动画均为可配置选项。设计目标是让项目里不再手写"Button + 正常/按下/阴影 Sprite2D 子节点 + 悬浮缩放脚本"这种样板。
 
 ## 文件结构
 
 ```
-addons/better_godot_button/
+addons/better-godot-button/
 ├── plugin.cfg            # 插件清单，name=GodotBetterButton, author=luvland
 ├── 插件.gd               # EditorPlugin，注册自定义类型"更好的按钮"
-├── better_button.gd      # 核心脚本 @tool extends Button class_name 更好的按钮
-├── button_texture_layer.gd  # Resource：追加纹理层的单项配置
+├── better-button.gd      # 核心脚本 @tool extends Button class_name 更好的按钮
+├── button-texture-layer.gd  # Resource：追加纹理层的单项配置
 ├── animations/            # 14 个动画配置资源（全部继承 按钮动画基类）
-│   ├── animation_base.gd  #   触发时机三勾选 + 时长
-│   ├── hover_grow_animation.gd   #   默认 悬停时播放，放大量 1.1
-│   ├── press_shrink_animation.gd #   默认 按下时播放，缩小量 0.95
-│   ├── click_shake_animation.gd  #   默认 点击时播放，角度/次数
-│   ├── click_bounce_animation.gd #   默认 点击时播放，弹跳放大量 1.2
-│   ├── sway_offset_animation.gd / hop_offset_animation.gd / sway_rotation_animation.gd / vibration_animation.gd
-│   ├── blink_animation.gd / color_flash_animation.gd / heartbeat_animation.gd / squash_stretch_animation.gd
-│   └── nod_animation.gd / sink_animation.gd
+│   ├── animation-base.gd  #   触发时机三勾选 + 时长
+│   ├── hover-grow-animation.gd   #   默认 悬停时播放，放大量 1.1
+│   ├── press-shrink-animation.gd #   默认 按下时播放，缩小量 0.95
+│   ├── click-shake-animation.gd  #   默认 点击时播放，角度/次数
+│   ├── click-bounce-animation.gd #   默认 点击时播放，弹跳放大量 1.2
+│   ├── sway-offset-animation.gd / hop-offset-animation.gd / sway-rotation-animation.gd / vibration-animation.gd
+│   ├── blink-animation.gd / color-flash-animation.gd / heartbeat-animation.gd / squash-stretch-animation.gd
+│   └── nod-animation.gd / sink-animation.gd
 └── shader/
-    ├── preview_3d.gdshader  # 与项目 shader/3D预览.gdshader 同源
+    ├── preview-3d.gdshader  # 与项目 shader/3D预览.gdshader 同源
     └── outline.gdshader     # 透明边缘描边，uniform：描边颜色/描边宽度/显示描边
 ```
 
@@ -41,7 +41,7 @@ addons/better_godot_button/
 
 ### 方式 A：检查器操作（人类用户路径）
 
-1. 新建节点搜索"更好的按钮"（或把 `better_button.gd` 拖到已有 Button 上）
+1. 新建节点搜索"更好的按钮"（或把 `better-button.gd` 拖到已有 Button 上）
 2. **纹理**组：拖入 `常规纹理` 即可工作；需要悬停/按下差异就填 `悬停纹理`/`按下纹理`
 3. **阴影**组：勾 `启用阴影`（默认偏移 (5,5)、透明度 0.5）
 4. **动画**组：每个动画是可展开资源，勾选 触发时机（悬停时/按下时/点击时播放）+ 调参数
@@ -69,7 +69,7 @@ script = ExtResource("1")
 动画配置以 sub_resource 挂在节点属性上：
 
 ```ini
-[ext_resource type="Script" path="res://addons/better_godot_button/动画配置/悬停放大动画.gd" id="2_afd"]
+[ext_resource type="Script" path="res://addons/better-godot-button/动画配置/悬停放大动画.gd" id="2_afd"]
 
 [sub_resource type="Resource" id="Resource_anim1"]
 script = ExtResource("2_afd")

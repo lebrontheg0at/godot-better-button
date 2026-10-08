@@ -1,4 +1,4 @@
-# godot_better_button
+# godot-better-button
 
 [中文文档](README.zh-CN.md)
 
@@ -9,8 +9,8 @@ This repository ships **two plugin folders**, identical in behavior, differing o
 
 | Folder | Inspector language | Custom type |
 |---|---|---|
-| `better_godot_button/` | English (English property names & groups) | **Better Button** |
-| `better_godot_button_zh/` | 中文 (中文属性名与分组) | **更好的按钮** |
+| `better-godot-button/` | English (English property names & groups) | **Better Button** |
+| `better-godot-button-zh/` | 中文 (中文属性名与分组) | **更好的按钮** |
 
 Install only **one** of them — copy that folder into your project's `addons/` and enable it in *Project → Project Settings → Plugins*.
 
@@ -43,13 +43,13 @@ Install only **one** of them — copy that folder into your project's `addons/` 
 | `godot-4.7` | 4.7 | 4.7-specific fixes; starts identical to `master` |
 
 ```bash
-git clone -b master      https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.5
-git clone -b godot-4.7   https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.7
+git clone -b master      https://github.com/lebrontheg0at/godot-better-button.git   # Godot 4.5
+git clone -b godot-4.7   https://github.com/lebrontheg0at/godot-better-button.git   # Godot 4.7
 ```
 
 ## Installation
 
-1. Copy **one** of the two plugin folders (`better_godot_button` or `better_godot_button_zh`) into your project's `addons/`.
+1. Copy **one** of the two plugin folders (`better-godot-button` or `better-godot-button-zh`) into your project's `addons/`.
 2. Enable it in *Project → Project Settings → Plugins*.
 
 ## Usage
@@ -71,7 +71,7 @@ Interactions match classic card-game buttons: pressing swaps to the pressed text
 ## How it works
 
 ```
-better_button.gd (@tool, _ready)
+better-button.gd (@tool, _ready)
   └─► builds internal Sprite2D/Label children from inspector configs
         ├── texture layers: normal/hover/pressed with graceful fallback
         ├── shadow: darkened copy of the base layer, follows state
@@ -87,17 +87,17 @@ Generated nodes are Godot **internal** nodes — invisible in the scene dock, sa
 ## Repository layout
 
 ```
-godot_better_button/
+godot-better-button/
 ├── README.md                    # this file
 ├── LICENSE                      # MIT
 ├── AI_AGENT_GUIDE.md            # usage guide written for AI agents
-├── better_godot_button/         # English plugin  (Better Button)
+├── better-godot-button/         # English plugin  (Better Button)
 │   ├── plugin.cfg / plugin.gd
-│   ├── better_button.gd         # core script (@tool extends Button, class_name BetterButton)
-│   ├── button_texture_layer.gd
-│   ├── animations/              # 14 animation configs (animation_base.gd + presets)
-│   └── shader/preview_3d.gdshader, outline.gdshader
-└── better_godot_button_zh/      # Chinese plugin  (更好的按钮, same structure)
+│   ├── better-button.gd         # core script (@tool extends Button, class_name BetterButton)
+│   ├── button-texture-layer.gd
+│   ├── animations/              # 14 animation configs (animation-base.gd + presets)
+│   └── shader/preview-3d.gdshader, outline.gdshader
+└── better-godot-button-zh/      # Chinese plugin  (更好的按钮, same structure)
 ```
 
 ## License

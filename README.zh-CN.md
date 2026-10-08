@@ -1,4 +1,4 @@
-# godot_better_button | 更好的按钮
+# godot-better-button | 更好的按钮
 
 两个 Godot 编辑器插件（英文版 + 中文版），提供**更好的按钮**——多层纹理复合按钮，所有视觉、动画、音效都是检查器里的可选项。再也不用手写"Button + 正常/按下/阴影 Sprite2D 子节点 + 悬浮缩放脚本"这种样板代码。
 
@@ -6,8 +6,8 @@
 
 | 文件夹 | 检查器语言 | 自定义类型 |
 |---|---|---|
-| `better_godot_button/` | 英文（属性与分组全英文） | **Better Button** |
-| `better_godot_button_zh/` | 中文（属性与分组中文） | **更好的按钮** |
+| `better-godot-button/` | 英文（属性与分组全英文） | **Better Button** |
+| `better-godot-button-zh/` | 中文（属性与分组中文） | **更好的按钮** |
 
 只安装**其中一个**——把对应文件夹复制到项目的 `addons/`，然后在 *项目 → 项目设置 → 插件* 里启用。
 
@@ -40,13 +40,13 @@
 | `godot-4.7` | 4.7 | 4.7 适配分支，初始与 `master` 相同 |
 
 ```bash
-git clone -b master      https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.5
-git clone -b godot-4.7   https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.7
+git clone -b master      https://github.com/lebrontheg0at/godot-better-button.git   # Godot 4.5
+git clone -b godot-4.7   https://github.com/lebrontheg0at/godot-better-button.git   # Godot 4.7
 ```
 
 ## 安装
 
-1. 复制**其中一个**插件文件夹（`better_godot_button` 或 `better_godot_button_zh`）到项目的 `addons/`
+1. 复制**其中一个**插件文件夹（`better-godot-button` 或 `better-godot-button-zh`）到项目的 `addons/`
 2. 在 *项目 → 项目设置 → 插件* 里启用
 
 ## 使用
@@ -68,7 +68,7 @@ git clone -b godot-4.7   https://github.com/lebrontheg0at/godot_better_button.gi
 ## 工作原理
 
 ```
-better_button.gd (@tool, _ready)
+better-button.gd (@tool, _ready)
   └─► 按检查器配置生成内部 Sprite2D/Label 子节点
         ├── 纹理层：常规/悬停/按下，缺失状态逐级回落
         ├── 阴影：首层纹理调黑半透明，跟随状态切换
@@ -84,17 +84,17 @@ better_button.gd (@tool, _ready)
 ## 仓库结构
 
 ```
-godot_better_button/
+godot-better-button/
 ├── README.md                  # 本文件
 ├── LICENSE                    # MIT
 ├── AI_AGENT_GUIDE.md          # 专为 AI agent 编写的使用指南
-├── better_godot_button/       # 英文版插件（Better Button）
+├── better-godot-button/       # 英文版插件（Better Button）
 │   ├── plugin.cfg / plugin.gd
-│   ├── better_button.gd       # 核心脚本（@tool extends Button，class_name BetterButton）
-│   ├── button_texture_layer.gd
-│   ├── animations/            # 14 个动画配置（animation_base.gd + 各预设）
-│   └── shader/preview_3d.gdshader, outline.gdshader
-└── better_godot_button_zh/    # 中文版插件（更好的按钮，结构同上）
+│   ├── better-button.gd       # 核心脚本（@tool extends Button，class_name BetterButton）
+│   ├── button-texture-layer.gd
+│   ├── animations/            # 14 个动画配置（animation-base.gd + 各预设）
+│   └── shader/preview-3d.gdshader, outline.gdshader
+└── better-godot-button-zh/    # 中文版插件（更好的按钮，结构同上）
 ```
 
 ## 许可证
