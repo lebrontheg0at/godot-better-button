@@ -19,7 +19,7 @@
 
 ```
 addons/better_godot_button/
-├── plugin.cfg            # 插件清单，name=BetterGodotButton, author=luvland
+├── plugin.cfg            # 插件清单，name=GodotBetterButton, author=luvland
 ├── 插件.gd               # EditorPlugin，注册自定义类型"更好的按钮"
 ├── better_button.gd      # 核心脚本 @tool extends Button class_name 更好的按钮
 ├── button_texture_layer.gd  # Resource：追加纹理层的单项配置
