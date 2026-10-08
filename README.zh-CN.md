@@ -1,6 +1,6 @@
 # godot_better_button | 更好的按钮
 
-两个 Godot 4.5 编辑器插件（英文版 + 中文版），提供**更好的按钮**——多层纹理复合按钮，所有视觉、动画、音效都是检查器里的可选项。再也不用手写"Button + 正常/按下/阴影 Sprite2D 子节点 + 悬浮缩放脚本"这种样板代码。
+两个 Godot 编辑器插件（英文版 + 中文版），提供**更好的按钮**——多层纹理复合按钮，所有视觉、动画、音效都是检查器里的可选项。再也不用手写"Button + 正常/按下/阴影 Sprite2D 子节点 + 悬浮缩放脚本"这种样板代码。
 
 本仓库包含**两个插件文件夹**，行为完全一致，仅语言不同：
 
@@ -29,8 +29,20 @@
 
 | | |
 |---|---|
-| 引擎 | Godot 4.5 |
+| 引擎 | Godot 4.5（`master` 分支）/ Godot 4.7（`godot-4.7` 分支） |
 | 语言 | GDScript（零依赖） |
+
+### 分支说明
+
+| 分支 | Godot 版本 | 说明 |
+|---|---|---|
+| `master` | 4.5 | 稳定主线，已实测 |
+| `godot-4.7` | 4.7 | 4.7 适配分支，初始与 `master` 相同 |
+
+```bash
+git clone -b master      https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.5
+git clone -b godot-4.7   https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.7
+```
 
 ## 安装
 

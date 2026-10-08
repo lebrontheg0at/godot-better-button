@@ -3,7 +3,7 @@
 [中文文档](README.zh-CN.md)
 
 
-Two Godot 4.5 editor plugins (an English one and a Chinese one) providing **Better Button** — a multi-texture composite button where every visual, animation, and sound is an optional inspector setting. Stop hand-writing "Button + Normal/Pressed/Shadow Sprite2D children + hover-scale script" boilerplate.
+Two Godot editor plugins (an English one and a Chinese one) providing **Better Button** — a multi-texture composite button where every visual, animation, and sound is an optional inspector setting. Stop hand-writing "Button + Normal/Pressed/Shadow Sprite2D children + hover-scale script" boilerplate.
 
 This repository ships **two plugin folders**, identical in behavior, differing only in language:
 
@@ -32,8 +32,20 @@ Install only **one** of them — copy that folder into your project's `addons/` 
 
 | | |
 |---|---|
-| Engine | Godot 4.5 |
+| Engine | Godot 4.5 (branch `master`) / Godot 4.7 (branch `godot-4.7`) |
 | Language | GDScript (no dependencies) |
+
+### Branches
+
+| Branch | Godot version | Notes |
+|---|---|---|
+| `master` | 4.5 | Stable, tested line |
+| `godot-4.7` | 4.7 | 4.7-specific fixes; starts identical to `master` |
+
+```bash
+git clone -b master      https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.5
+git clone -b godot-4.7   https://github.com/lebrontheg0at/godot_better_button.git   # Godot 4.7
+```
 
 ## Installation
 
