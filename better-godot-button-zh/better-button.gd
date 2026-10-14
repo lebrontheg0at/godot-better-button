@@ -34,12 +34,33 @@ class_name 更好的按钮
 		if is_inside_tree():
 			_构建纹理层()
 
+# 三个状态各自的 Sprite2D 类参数（颜色/偏移/缩放/旋转/翻转），只作用于基础三层纹理
+# 参数按状态独立生效，不跟随纹理回落：悬停纹理留空也能靠 悬停参数 调色
+@export var 常规参数: 纹理参数 = null:
+	set(值):
+		常规参数 = 值
+		if is_inside_tree():
+			_刷新纹理()
+@export var 悬停参数: 纹理参数 = null:
+	set(值):
+		悬停参数 = 值
+		if is_inside_tree():
+			_刷新纹理()
+@export var 按下参数: 纹理参数 = null:
+	set(值):
+		按下参数 = 值
+		if is_inside_tree():
+			_刷新纹理()
+
 # 追加层，叠在基础纹理之上；每层都可选 常规/悬停/按下 三种纹理
 @export var 纹理层列表: Array[按钮纹理层] = []:
 	set(值):
 		纹理层列表 = 值
 		if is_inside_tree():
 			_构建纹理层()
+
+# 把按钮尺寸改成常规纹理的尺寸（乘上常规参数的缩放），并同步最小尺寸
+@export_tool_button("按纹理大小匹配按钮") var 按纹理匹配大小动作 = _按纹理匹配大小
 
 @export_group("阴影")
 # 复制首层纹理垫在最底下：调黑半透明再偏移，省去手摆阴影层
@@ -218,6 +239,7 @@ func _ready() -> void:
 		_复位图案位置()
 	)
 	_初始化动画配置()
+	_初始化纹理参数()
 	_构建纹理层()
 	_构建文本()
 	if Engine.is_editor_hint():
@@ -268,6 +290,29 @@ func _初始化动画配置() -> void:
 		点头 = 点头动画.new()
 	if 下沉 == null:
 		下沉 = 下沉动画.new()
+
+
+func _初始化纹理参数() -> void:
+	# 未配置时补一份默认参数（默认不改变外观），编辑器里可直接展开调整
+	if 常规参数 == null:
+		常规参数 = 纹理参数.new()
+	if 悬停参数 == null:
+		悬停参数 = 纹理参数.new()
+	if 按下参数 == null:
+		按下参数 = 纹理参数.new()
+	# 参数资源内部改动也要实时刷新
+	for 参数 in [常规参数, 悬停参数, 按下参数]:
+		if not 参数.changed.is_connected(_刷新纹理):
+			参数.changed.connect(_刷新纹理)
+
+
+func _当前状态参数() -> 纹理参数:
+	# 按下 > 悬停 > 常规，缺省逐级回落
+	if _按下中 and 按下参数:
+		return 按下参数
+	if _悬浮中 and 悬停参数:
+		return 悬停参数
+	return 常规参数
 
 
 func _悬停目标倍数() -> float:
@@ -462,10 +507,35 @@ func _刷新阴影() -> void:
 	var 配置列表 := _当前配置()
 	if _阴影图案 == null or not is_instance_valid(_阴影图案) or 配置列表.is_empty():
 		return
-	var 配置: 按钮纹理层 = 配置列表[0]
+	# 阴影跟着首层图案走：几何跟随状态参数，颜色仍是压黑的
+	_应用状态几何(_阴影图案, 配置列表[0])
+	_阴影图案.position += 阴影偏移
 	_阴影图案.modulate = Color(0.0, 0.0, 0.0, 阴影透明度)
-	_阴影图案.scale = 配置.缩放
-	_阴影图案.position = 配置.偏移 + 阴影偏移
+
+
+func _应用状态几何(图案: Sprite2D, 配置: 按钮纹理层) -> void:
+	# 基础层与快捷阴影共用：层基础值上叠当前状态的偏移/缩放/旋转/翻转
+	var 参数 := _当前状态参数()
+	图案.position = 配置.偏移 + (参数.偏移 if 参数 else Vector2.ZERO)
+	图案.scale = 配置.缩放 * (参数.缩放 if 参数 else Vector2.ONE)
+	图案.rotation = deg_to_rad(参数.旋转) if 参数 else 0.0
+	图案.flip_h = 参数.翻转水平 if 参数 else false
+	图案.flip_v = 参数.翻转垂直 if 参数 else false
+
+
+func _按纹理匹配大小() -> void:
+	# 按常规纹理尺寸匹配按钮尺寸（缺省回落到悬停/按下纹理），含常规参数的缩放
+	var 纹理 := 常规纹理
+	if 纹理 == null:
+		纹理 = 悬停纹理
+	if 纹理 == null:
+		纹理 = 按下纹理
+	if 纹理 == null:
+		return
+	var 目标尺寸: Vector2 = (纹理.get_size() * (常规参数.缩放 if 常规参数 else Vector2.ONE)).abs()
+	# 容器内只有最小尺寸生效，容器外只有 size 生效，所以两个都设
+	custom_minimum_size = 目标尺寸
+	size = 目标尺寸
 
 
 func _复位图案位置() -> void:
@@ -600,7 +670,6 @@ func _刷新层() -> void:
 			材质.set_shader_parameter("show_outline", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
 			图案.material = 材质
 	_刷新纹理()
-	_刷新阴影()
 
 
 func _刷新纹理() -> void:
@@ -615,9 +684,15 @@ func _刷新纹理() -> void:
 		elif _悬浮中 and 配置.悬停纹理:
 			目标纹理 = 配置.悬停纹理
 		_层图案[i].texture = 目标纹理
-	# 快捷阴影跟随首层纹理，保证悬停/按下切换时阴影同步
+	# 基础层（首层）叠加当前状态参数，追加层保持原行为
+	if not _层图案.is_empty() and not 配置列表.is_empty():
+		_应用状态几何(_层图案[0], 配置列表[0])
+		var 参数 := _当前状态参数()
+		_层图案[0].modulate = 配置列表[0].颜色 * (参数.颜色 if 参数 else Color.WHITE)
+	# 快捷阴影跟随首层纹理与几何，保证悬停/按下切换时阴影同步
 	if _阴影图案 and is_instance_valid(_阴影图案) and not _层图案.is_empty():
 		_阴影图案.texture = _层图案[0].texture
+	_刷新阴影()
 
 
 func _on_mouse_entered() -> void:

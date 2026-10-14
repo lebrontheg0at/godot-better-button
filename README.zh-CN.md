@@ -18,6 +18,8 @@
 ## 功能特性
 
 - 🎨 **三态纹理**——常规/悬停/按下三个槽位，还可在其上叠加自定义纹理层
+- 🎛️ **三态各自的可调参数**——每个状态都能像 Sprite2D 一样调 颜色(modulate)/偏移/缩放/旋转/翻转
+- 📐 **一键匹配尺寸**——检查器里的按钮：按纹理大小改按钮节点尺寸（含最小尺寸）
 - 🌑 **快捷阴影**——一个勾选：自动生成跟随状态的阴影（首层纹理调黑偏移），全权托管
 - ✍️ **自动文本**——自动创建文本 Label，支持字体/字号/颜色/描边/投影阴影/悬停变色/按下下移
 - 🎞️ **14 个动画预设**——悬停放大、按下缩小、点击抖动、点击弹跳、位移摇晃、上下弹动、旋转摆动、位置震动、闪烁、颜色闪烁、心跳、挤压拉伸、点头、下沉；每个可展开，独立配置触发时机与参数
@@ -55,7 +57,7 @@ git clone -b godot-4.7   https://github.com/lebrontheg0at/godot-better-button.gi
 
 | 分组 | 功能 |
 |---|---|
-| 纹理 | 常规/悬停/按下槽位（自动居中）+ `纹理层列表` 追加层 |
+| 纹理 | 常规/悬停/按下槽位（自动居中）、三态各自的 Sprite2D 类参数（`常规参数`/`悬停参数`/`按下参数`）、`纹理层列表` 追加层、**按纹理大小匹配按钮** 按钮 |
 | 阴影 | 跟随状态的阴影；默认偏移 (5,5)、透明度 50% |
 | 动画 | 14 个预设，各自带悬停/按下/点击触发勾选与参数 |
 | 文本 | 自动 Label：内容、字体、字号、颜色、描边、阴影、悬停变色、按下下移 |
@@ -71,6 +73,7 @@ git clone -b godot-4.7   https://github.com/lebrontheg0at/godot-better-button.gi
 better-button.gd (@tool, _ready)
   └─► 按检查器配置生成内部 Sprite2D/Label 子节点
         ├── 纹理层：常规/悬停/按下，缺失状态逐级回落
+        ├── 状态参数：基础层的 颜色/偏移/缩放/旋转/翻转 按状态切换
         ├── 阴影：首层纹理调黑半透明，跟随状态切换
         └── 文本 Label：可选，场景里同名 Label 会被复用
 悬停 / 按下 / 点击 ──► 状态切换 + 动画派发（position / rotation /
@@ -91,7 +94,8 @@ godot-better-button/
 ├── better-godot-button/       # 英文版插件（Better Button）
 │   ├── plugin.cfg / plugin.gd
 │   ├── better-button.gd       # 核心脚本（@tool extends Button，class_name BetterButton）
-│   ├── button-texture-layer.gd
+│   ├── button-texture-layer.gd # 追加层的单项配置
+│   ├── texture-params.gd      # 单个状态的 Sprite2D 类参数
 │   ├── animations/            # 14 个动画配置（animation-base.gd + 各预设）
 │   └── shader/preview-3d.gdshader, outline.gdshader
 └── better-godot-button-zh/    # 中文版插件（更好的按钮，结构同上）

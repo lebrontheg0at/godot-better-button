@@ -34,12 +34,34 @@ class_name BetterButton
 		if is_inside_tree():
 			_build_texture_layers()
 
+# Per-state Sprite2D-like parameters (color/offset/scale/rotation/flip), base 3-state layer only
+# Params apply per state and do not follow the texture fallback: hover_params tints even
+# when no hover_texture is set
+@export var normal_params: TextureParams = null:
+	set(value):
+		normal_params = value
+		if is_inside_tree():
+			_refresh_textures()
+@export var hover_params: TextureParams = null:
+	set(value):
+		hover_params = value
+		if is_inside_tree():
+			_refresh_textures()
+@export var pressed_params: TextureParams = null:
+	set(value):
+		pressed_params = value
+		if is_inside_tree():
+			_refresh_textures()
+
 # Extra layers stacked above the base; each can choose normal/hover/pressed textures
 @export var texture_layers: Array[ButtonTextureLayer] = []:
 	set(value):
 		texture_layers = value
 		if is_inside_tree():
 			_build_texture_layers()
+
+# Resize the button to the normal texture's size (times normal_params.scale), min size included
+@export_tool_button("Match Button Size to Texture") var match_size_action = _match_size_to_texture
 
 @export_group("Shadow")
 # Copy the first layer as a darkened, offset shadow — no manual shadow node needed
@@ -218,6 +240,7 @@ func _ready() -> void:
 		_reset_layer_offset()
 	)
 	_init_animations()
+	_init_texture_params()
 	_build_texture_layers()
 	_build_text()
 	if Engine.is_editor_hint():
@@ -268,6 +291,29 @@ func _init_animations() -> void:
 		nod = NodAnimation.new()
 	if sink == null:
 		sink = SinkAnimation.new()
+
+
+func _init_texture_params() -> void:
+	# Fill unset params with defaults (no visual change), so they can be tweaked right away
+	if normal_params == null:
+		normal_params = TextureParams.new()
+	if hover_params == null:
+		hover_params = TextureParams.new()
+	if pressed_params == null:
+		pressed_params = TextureParams.new()
+	# Edits inside a params resource refresh live
+	for params in [normal_params, hover_params, pressed_params]:
+		if not params.changed.is_connected(_refresh_textures):
+			params.changed.connect(_refresh_textures)
+
+
+func _current_state_params() -> TextureParams:
+	# Pressed > hover > normal, falling back when a slot is empty
+	if _pressing and pressed_params:
+		return pressed_params
+	if _hovering and hover_params:
+		return hover_params
+	return normal_params
 
 
 func _hover_target_scale() -> float:
@@ -463,10 +509,35 @@ func _update_shadow() -> void:
 	var list := _current_layers()
 	if _shadow_sprite == null or not is_instance_valid(_shadow_sprite) or list.is_empty():
 		return
-	var cfg: ButtonTextureLayer = list[0]
+	# The shadow follows the first layer: geometry tracks the state params, color stays blackened
+	_apply_state_geometry(_shadow_sprite, list[0])
+	_shadow_sprite.position += shadow_offset
 	_shadow_sprite.modulate = Color(0.0, 0.0, 0.0, shadow_opacity)
-	_shadow_sprite.scale = cfg.scale
-	_shadow_sprite.position = cfg.offset + shadow_offset
+
+
+func _apply_state_geometry(sprite: Sprite2D, cfg: ButtonTextureLayer) -> void:
+	# Shared by the base layer and the quick shadow: layer values plus current state params
+	var params := _current_state_params()
+	sprite.position = cfg.offset + (params.offset if params else Vector2.ZERO)
+	sprite.scale = cfg.scale * (params.scale if params else Vector2.ONE)
+	sprite.rotation = deg_to_rad(params.rotation) if params else 0.0
+	sprite.flip_h = params.flip_h if params else false
+	sprite.flip_v = params.flip_v if params else false
+
+
+func _match_size_to_texture() -> void:
+	# Match the button size to the normal texture (falling back to hover/pressed), with params scale
+	var texture := normal_texture
+	if texture == null:
+		texture = hover_texture
+	if texture == null:
+		texture = pressed_texture
+	if texture == null:
+		return
+	var target: Vector2 = (texture.get_size() * (normal_params.scale if normal_params else Vector2.ONE)).abs()
+	# Only the minimum size works inside a container, only size works outside it — set both
+	custom_minimum_size = target
+	size = target
 
 
 func _reset_layer_offset() -> void:
@@ -603,7 +674,6 @@ func _refresh_layers() -> void:
 			material.set_shader_parameter("show_outline", 1.0 if (not hover_outline or _hovering) else 0.0)
 			sprite.material = material
 	_refresh_textures()
-	_update_shadow()
 
 
 func _refresh_textures() -> void:
@@ -618,9 +688,15 @@ func _refresh_textures() -> void:
 		elif _hovering and cfg.hover_texture:
 			target = cfg.hover_texture
 		_layer_sprites[i].texture = target
-	# Shadow follows the first layer so it stays in sync on hover/press switching
+	# The base layer (first) takes the current state params; extra layers keep their own look
+	if not _layer_sprites.is_empty() and not list.is_empty():
+		_apply_state_geometry(_layer_sprites[0], list[0])
+		var params := _current_state_params()
+		_layer_sprites[0].modulate = list[0].color * (params.color if params else Color.WHITE)
+	# Shadow follows the first layer's texture and geometry, staying in sync on hover/press switching
 	if _shadow_sprite and is_instance_valid(_shadow_sprite) and not _layer_sprites.is_empty():
 		_shadow_sprite.texture = _layer_sprites[0].texture
+	_update_shadow()
 
 
 func _on_mouse_entered() -> void:

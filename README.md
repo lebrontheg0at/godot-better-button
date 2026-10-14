@@ -21,6 +21,8 @@ Install only **one** of them — copy that folder into your project's `addons/` 
 ## Highlights
 
 - 🎨 **3-state textures** — normal / hover / pressed slots, plus extra custom layers stacked on top
+- 🎛️ **Per-state sprite params** — color (modulate), offset, scale, rotation and flip per state, like a Sprite2D
+- 📐 **One-click size match** — a button in the inspector resizes the node (and its minimum size) to the texture
 - 🌑 **Quick shadow** — one checkbox: a state-following darkened copy of the base texture, auto-managed
 - ✍️ **Auto text** — auto-created label with font/size/color/outline/drop-shadow, hover color change, and press-move-down
 - 🎞️ **14 animation presets** — hover grow, press shrink, click shake, click bounce, offset sway, hop, rotation sway, vibration, blink, color flash, heartbeat, squash & stretch, nod, sink; each expandable with its own trigger checkboxes and parameters
@@ -58,7 +60,7 @@ After adding the node, every feature is an inspector option and everything is op
 
 | Group | What you get |
 |---|---|
-| Texture | Normal/hover/pressed slots (auto-centered) + extra layers via `texture_layers` |
+| Texture | Normal/hover/pressed slots (auto-centered), per-state sprite params (`normal_params` / `hover_params` / `pressed_params`), extra layers via `texture_layers`, and a **Match Button Size to Texture** button |
 | Shadow | State-following shadow; offset (5,5) and 50% opacity by default |
 | Animation | 14 presets, each with hover/press/click triggers and parameters |
 | Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down |
@@ -74,6 +76,7 @@ Interactions match classic card-game buttons: pressing swaps to the pressed text
 better-button.gd (@tool, _ready)
   └─► builds internal Sprite2D/Label children from inspector configs
         ├── texture layers: normal/hover/pressed with graceful fallback
+        ├── per-state params: color/offset/scale/rotation/flip of the base layer
         ├── shadow: darkened copy of the base layer, follows state
         └── text label: optional, reused if a same-named label exists
 Hover / press / click ──► state swap + animation dispatch (separate
@@ -94,7 +97,8 @@ godot-better-button/
 ├── better-godot-button/         # English plugin  (Better Button)
 │   ├── plugin.cfg / plugin.gd
 │   ├── better-button.gd         # core script (@tool extends Button, class_name BetterButton)
-│   ├── button-texture-layer.gd
+│   ├── button-texture-layer.gd  # one extra layer's config
+│   ├── texture-params.gd        # one state's Sprite2D-like params
 │   ├── animations/              # 14 animation configs (animation-base.gd + presets)
 │   └── shader/preview-3d.gdshader, outline.gdshader
 └── better-godot-button-zh/      # Chinese plugin  (更好的按钮, same structure)
