@@ -64,8 +64,9 @@ class_name BetterButton
 # The tick stays; untick and tick again to re-apply. Loading a scene does not trigger it (not in tree yet)
 @export var match_texture_size: bool = false:
 	set(value):
-		match_texture_size = value
-		if value and is_inside_tree():
+		# "== true" so a null left over by an older script version cannot raise a type error
+		match_texture_size = value == true
+		if match_texture_size and is_inside_tree():
 			_match_size_to_texture()
 
 @export_group("Shadow")
@@ -677,6 +678,11 @@ func _refresh_layers() -> void:
 			material.set_shader_parameter("outline_color", outline_color)
 			material.set_shader_parameter("outline_width", outline_width)
 			material.set_shader_parameter("show_outline", 1.0 if (not hover_outline or _hovering) else 0.0)
+			# Seed the mouse-follow uniform with a neutral value (the sprite's own position); without
+			# it the shader offsets from the world origin and the sprite looks tilted in the editor,
+			# and in-game until the first hover
+			if mouse_uniform_name != "":
+				material.set_shader_parameter(mouse_uniform_name, sprite.global_position)
 			sprite.material = material
 	_refresh_textures()
 

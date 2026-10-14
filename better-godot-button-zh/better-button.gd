@@ -63,8 +63,9 @@ class_name 更好的按钮
 # 勾选状态保留；取消再勾可重新匹配。加载场景时不再触发（那时还没进场景树）
 @export var 匹配纹理大小: bool = false:
 	set(值):
-		匹配纹理大小 = 值
-		if 值 and is_inside_tree():
+		# 写成 == true：旧版本存下的 null 值不会报类型错误
+		匹配纹理大小 = 值 == true
+		if 匹配纹理大小 and is_inside_tree():
 			_按纹理匹配大小()
 
 @export_group("阴影")
@@ -673,6 +674,10 @@ func _刷新层() -> void:
 			材质.set_shader_parameter("outline_color", 描边颜色)
 			材质.set_shader_parameter("outline_width", 描边宽度)
 			材质.set_shader_parameter("show_outline", 1.0 if (not 悬停描边 or _悬浮中) else 0.0)
+			# 跟随鼠标的着色器先填一个中性值（图案自身位置），否则编辑器里会按世界原点
+			# 算偏移，画面是歪的；运行时首次悬停前同理
+			if 鼠标跟随参数名 != "":
+				材质.set_shader_parameter(鼠标跟随参数名, 图案.global_position)
 			图案.material = 材质
 	_刷新纹理()
 
