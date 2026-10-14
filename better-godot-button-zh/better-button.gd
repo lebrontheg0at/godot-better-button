@@ -156,11 +156,18 @@ class_name 更好的按钮
 		文本阴影偏移 = 值
 		_更新文本阴影()
 
-# 按下时文本 Label 下移，松开复位
+# 按下时文本 Label 下移，松开复位；不想要下移就关掉开关，不用把 文本下移距离 调成 0
 @export var 文本偏移: Vector2 = Vector2.ZERO:
 	set(值):
 		文本偏移 = 值
 		_刷新文本位置()
+@export var 文本下移开关: bool = true:
+	set(值):
+		# null（脚本热重载可能留下的脏值）当默认值处理，不会静默关掉下移
+		文本下移开关 = 值 == null or 值 == true
+		# 按下过程中关掉开关，文本立即回位
+		if not 文本下移开关 and is_inside_tree():
+			_播放文本下移(false)
 @export var 文本下移距离: float = 16.0
 @export var 文本平滑下移: bool = true
 @export var 文本下移时长: float = 0.05
@@ -790,7 +797,7 @@ func _播放文本下移(下移: bool) -> void:
 	if _文本动画 and is_instance_valid(_文本动画):
 		_文本动画.kill()
 	var 基准 := _文本原始位置 + 文本偏移
-	var 目标y := 基准.y + (文本下移距离 if 下移 else 0.0)
+	var 目标y := 基准.y + (文本下移距离 if 下移 and 文本下移开关 else 0.0)
 	if 文本平滑下移:
 		_文本动画 = create_tween()
 		_文本动画.set_ease(Tween.EASE_OUT)

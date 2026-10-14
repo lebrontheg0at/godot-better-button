@@ -63,7 +63,7 @@ After adding the node, every feature is an inspector option and everything is op
 | Texture | Normal/hover/pressed slots (auto-centered), per-state sprite params (`normal_params` / `hover_params` / `pressed_params`), extra layers via `texture_layers`, and a `match_texture_size` checkbox |
 | Shadow | State-following shadow; offset (5,5) and 50% opacity by default |
 | Animation | 14 presets, each with hover/press/click triggers and parameters |
-| Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down |
+| Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down (switchable) |
 | Outline | Built-in outline shader, optional hover-only mode |
 | Sound | Hover/press audio slots + independent volumes |
 | Shader | 3D-preview preset (mouse-follow) or custom shader |

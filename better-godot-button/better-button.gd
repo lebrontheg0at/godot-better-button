@@ -157,11 +157,19 @@ class_name BetterButton
 		text_shadow_offset = value
 		_update_text_shadow()
 
-# Text label moves down while pressed, restores on release
+# Text label moves down while pressed, restores on release; turn the switch off instead of
+# zeroing text_press_offset_y
 @export var text_offset: Vector2 = Vector2.ZERO:
 	set(value):
 		text_offset = value
 		_update_text_position()
+@export var text_press_move_enabled: bool = true:
+	set(value):
+		# null (left over by a script hot-reload) counts as the default, so it cannot silently disable
+		text_press_move_enabled = value == null or value == true
+		# Turning the switch off mid-press snaps the text back right away
+		if not text_press_move_enabled and is_inside_tree():
+			_play_text_move(false)
 @export var text_press_offset_y: float = 16.0
 @export var text_smooth_move: bool = true
 @export var text_move_duration: float = 0.05
@@ -791,7 +799,7 @@ func _play_text_move(down: bool) -> void:
 	if _text_tween and is_instance_valid(_text_tween):
 		_text_tween.kill()
 	var base := _text_origin + text_offset
-	var target_y := base.y + (text_press_offset_y if down else 0.0)
+	var target_y := base.y + (text_press_offset_y if down and text_press_move_enabled else 0.0)
 	if text_smooth_move:
 		_text_tween = create_tween()
 		_text_tween.set_ease(Tween.EASE_OUT)
