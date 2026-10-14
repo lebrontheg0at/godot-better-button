@@ -60,8 +60,13 @@ class_name BetterButton
 		if is_inside_tree():
 			_build_texture_layers()
 
-# Resize the button to the normal texture's size (times normal_params.scale), min size included
-@export_tool_button("Match Button Size to Texture") var match_size_action = _match_size_to_texture
+# Tick to match the button size to the normal texture once (times normal_params.scale), min size included
+# The tick stays; untick and tick again to re-apply. Loading a scene does not trigger it (not in tree yet)
+@export var match_texture_size: bool = false:
+	set(value):
+		match_texture_size = value
+		if value and is_inside_tree():
+			_match_size_to_texture()
 
 @export_group("Shadow")
 # Copy the first layer as a darkened, offset shadow — no manual shadow node needed

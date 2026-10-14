@@ -22,7 +22,7 @@ Install only **one** of them — copy that folder into your project's `addons/` 
 
 - 🎨 **3-state textures** — normal / hover / pressed slots, plus extra custom layers stacked on top
 - 🎛️ **Per-state sprite params** — color (modulate), offset, scale, rotation and flip per state, like a Sprite2D
-- 📐 **One-click size match** — a button in the inspector resizes the node (and its minimum size) to the texture
+- 📐 **One-click size match** — tick `match_texture_size` and the node (plus its minimum size) fits the texture
 - 🌑 **Quick shadow** — one checkbox: a state-following darkened copy of the base texture, auto-managed
 - ✍️ **Auto text** — auto-created label with font/size/color/outline/drop-shadow, hover color change, and press-move-down
 - 🎞️ **14 animation presets** — hover grow, press shrink, click shake, click bounce, offset sway, hop, rotation sway, vibration, blink, color flash, heartbeat, squash & stretch, nod, sink; each expandable with its own trigger checkboxes and parameters
@@ -60,7 +60,7 @@ After adding the node, every feature is an inspector option and everything is op
 
 | Group | What you get |
 |---|---|
-| Texture | Normal/hover/pressed slots (auto-centered), per-state sprite params (`normal_params` / `hover_params` / `pressed_params`), extra layers via `texture_layers`, and a **Match Button Size to Texture** button |
+| Texture | Normal/hover/pressed slots (auto-centered), per-state sprite params (`normal_params` / `hover_params` / `pressed_params`), extra layers via `texture_layers`, and a `match_texture_size` checkbox |
 | Shadow | State-following shadow; offset (5,5) and 50% opacity by default |
 | Animation | 14 presets, each with hover/press/click triggers and parameters |
 | Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down |
