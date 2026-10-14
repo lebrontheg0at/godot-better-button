@@ -16,6 +16,13 @@ class_name BetterButton
 		toggle_switch = value
 		toggle_mode = value
 
+# Flat: the button draws no theme stylebox, the plugin's textures/text provide the look;
+# new buttons start flat
+@export var flat_mode: bool = true:
+	set(value):
+		flat_mode = value
+		flat = value
+
 @export_group("Texture")
 # Base layer (bottom): drop a normal texture to make it work; hover/pressed are optional
 @export var normal_texture: Texture2D = null:
@@ -244,6 +251,17 @@ const preset_shader_list: Array[Shader] = [
 const outline_shader: Shader = preload("shader/outline.gdshader")
 
 
+func _init() -> void:
+	# New buttons are flat by default; a scene storing flat_mode = false overrides this right after
+	flat = true
+
+
+func _validate_property(property: Dictionary) -> void:
+	# The engine's own flat duplicates flat_mode — hide it so the inspector shows one checkbox
+	if property.name == "flat":
+		property.usage &= ~PROPERTY_USAGE_EDITOR
+
+
 func _ready() -> void:
 	_base_scale = scale
 	_origin_pos = position
@@ -273,6 +291,13 @@ func _process(_delta: float) -> void:
 	for sprite in _layer_sprites:
 		if sprite.material is ShaderMaterial:
 			sprite.material.set_shader_parameter(mouse_uniform_name, mouse_pos)
+
+
+func _reset_mouse_follow() -> void:
+	# Write each sprite's own position back = zero tilt (same convention as the project's buttons)
+	for sprite in _layer_sprites:
+		if sprite.material is ShaderMaterial:
+			sprite.material.set_shader_parameter(mouse_uniform_name, sprite.global_position)
 
 
 func _init_animations() -> void:
@@ -738,6 +763,9 @@ func _on_mouse_entered() -> void:
 
 func _on_mouse_exited() -> void:
 	_hovering = false
+	# Put the mouse-follow shader back to its neutral tilt, otherwise the 3D preview
+	# would stay at the last angle
+	_reset_mouse_follow()
 	# Restore the text even when exiting while pressed (matches the original sort-switch behavior)
 	_play_text_move(false)
 	_update_outline_visibility()

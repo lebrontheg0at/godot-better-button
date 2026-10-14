@@ -16,6 +16,12 @@ class_name 更好的按钮
 		开关模式 = 值
 		toggle_mode = 值
 
+# 扁平：按钮不画主题样式框，外观全交给插件纹理/文本；新建的按钮默认开启
+@export var 扁平: bool = true:
+	set(值):
+		扁平 = 值
+		flat = 值
+
 @export_group("纹理")
 # 默认的第一层（垫底）：拖入常规纹理即生效，悬停/按下纹理可选；追加层请用纹理层列表
 @export var 常规纹理: Texture2D = null:
@@ -242,6 +248,17 @@ const 预设着色器列表: Array[Shader] = [
 const 描边着色器: Shader = preload("shader/outline.gdshader")
 
 
+func _init() -> void:
+	# 新建的按钮默认扁平；场景里存了 扁平 = false 的话随后会覆盖回去
+	flat = true
+
+
+func _validate_property(属性: Dictionary) -> void:
+	# 引擎自带的 flat 与 扁平 重复，隐藏它，检查器里只留一个勾选框
+	if 属性.name == "flat":
+		属性.usage &= ~PROPERTY_USAGE_EDITOR
+
+
 func _ready() -> void:
 	_原始大小 = scale
 	_原始位置 = position
@@ -271,6 +288,13 @@ func _process(_delta: float) -> void:
 	for 图案 in _层图案:
 		if 图案.material is ShaderMaterial:
 			图案.material.set_shader_parameter(鼠标跟随参数名, 鼠标位置)
+
+
+func _复位鼠标跟随() -> void:
+	# 每个图案写回自己的位置 = 偏转归零（与项目里 自定义按钮.gd 的约定一致）
+	for 图案 in _层图案:
+		if 图案.material is ShaderMaterial:
+			图案.material.set_shader_parameter(鼠标跟随参数名, 图案.global_position)
 
 
 func _初始化动画配置() -> void:
@@ -732,6 +756,8 @@ func _on_mouse_entered() -> void:
 
 func _on_mouse_exited() -> void:
 	_悬浮中 = false
+	# 跟随鼠标的着色器回到中性偏转，否则 3D预览 会停在最后一次的角度
+	_复位鼠标跟随()
 	# 按住时移出也要复位文本，和原版排序切换行为一致
 	_播放文本下移(false)
 	_更新描边显示()
