@@ -181,6 +181,19 @@ class_name BetterButton
 @export var text_smooth_move: bool = true
 @export var text_move_duration: float = 0.05
 
+# Text 3D preview: bake the text Label into a texture via SubViewport and mount it on a sprite
+# with the 3D-preview shader. Attaching the shader to a Label does nothing — glyph UVs are
+# sub-rects of the font atlas, so the shader's offset degenerates to identity.
+# Runtime only: in the editor the plain Label keeps showing; in baked mode text press-move
+# and hover color animations have no effect.
+@export var text_bake_preview: bool = false:
+	set(value):
+		text_bake_preview = value
+		if is_inside_tree():
+			_rebuild_text_bake()
+# Padding kept around the baked text so outlines do not clip
+@export_range(0, 64) var text_bake_margin: int = 16
+
 @export_group("Outline")
 # Independent outline; takes priority over preset/custom shaders
 @export var enable_outline: bool = false:
@@ -243,6 +256,9 @@ var _pressing: bool = false
 var _pos_tween: Tween = null
 var _rot_tween: Tween = null
 var _fade_tween: Tween = null
+var _text_viewport: SubViewport = null
+var _text_bake_sprite: Sprite2D = null
+var _text_bake_queued: bool = false
 
 const preset_shader_list: Array[Shader] = [
 	null,
@@ -275,6 +291,8 @@ func _ready() -> void:
 	_init_texture_params()
 	_build_texture_layers()
 	_build_text()
+	if text_bake_preview:
+		_rebuild_text_bake()
 	if Engine.is_editor_hint():
 		return
 	mouse_entered.connect(_on_mouse_entered)
@@ -291,6 +309,8 @@ func _process(_delta: float) -> void:
 	for sprite in _layer_sprites:
 		if sprite.material is ShaderMaterial:
 			sprite.material.set_shader_parameter(mouse_uniform_name, mouse_pos)
+	if _text_bake_sprite and is_instance_valid(_text_bake_sprite) and _text_bake_sprite.material is ShaderMaterial:
+		_text_bake_sprite.material.set_shader_parameter(mouse_uniform_name, mouse_pos)
 
 
 func _reset_mouse_follow() -> void:
@@ -298,6 +318,8 @@ func _reset_mouse_follow() -> void:
 	for sprite in _layer_sprites:
 		if sprite.material is ShaderMaterial:
 			sprite.material.set_shader_parameter(mouse_uniform_name, sprite.global_position)
+	if _text_bake_sprite and is_instance_valid(_text_bake_sprite) and _text_bake_sprite.material is ShaderMaterial:
+		_text_bake_sprite.material.set_shader_parameter(mouse_uniform_name, _text_bake_sprite.global_position)
 
 
 func _init_animations() -> void:
@@ -492,8 +514,9 @@ func _current_layers() -> Array:
 
 func _build_texture_layers() -> void:
 	# Remove last auto-created nodes; same-named manual nodes in the scene are reused
+	# The text-3D sprite also carries plugin_created, but it is owned by the text bake — skip it
 	for child in get_children(true):
-		if child is Sprite2D and child.has_meta("plugin_created"):
+		if child is Sprite2D and child.has_meta("plugin_created") and child != _text_bake_sprite:
 			remove_child(child)
 			child.free()
 	_layer_sprites.clear()
@@ -597,12 +620,18 @@ func _find_layer(name: String) -> Sprite2D:
 
 
 func _build_text() -> void:
-	# Reuse a same-named Label in the scene; otherwise create one if auto_create_text is on
+	# Reuse a same-named Label in the scene (it may live in the bake viewport); otherwise
+	# create one if auto_create_text is on
 	_text_label = null
 	for child in get_children(true):
 		if child is Label and child.name == text_node_name:
 			_text_label = child
 			break
+	if _text_label == null and _text_viewport and is_instance_valid(_text_viewport):
+		for child in _text_viewport.get_children():
+			if child is Label and child.name == text_node_name:
+				_text_label = child
+				break
 	if _text_label == null and auto_create_text and not text_content.is_empty():
 		var label := Label.new()
 		label.name = text_node_name
@@ -622,6 +651,11 @@ func _reset_text_rect() -> void:
 	# offsets and never recovers, so any size change has to redo this
 	if _text_label == null or not is_instance_valid(_text_label):
 		return
+	if text_bake_preview and not Engine.is_editor_hint():
+		# In baked mode the text is drawn into the SubViewport: layout and re-bake are the
+		# bake logic's job
+		_queue_text_bake()
+		return
 	_text_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_text_label.offset_left = 0.0
 	_text_label.offset_top = 0.0
@@ -637,9 +671,102 @@ func _reset_text_rect() -> void:
 func _update_text_position() -> void:
 	if _text_label == null or not is_instance_valid(_text_label):
 		return
+	if text_bake_preview and not Engine.is_editor_hint():
+		# Baked mode keeps the bake source stable — text animations do not move the Label
+		return
 	if _text_tween and is_instance_valid(_text_tween):
 		_text_tween.kill()
 	_text_label.position = _text_origin + text_offset
+
+
+## Turn bake mode on/off: the text Label moves into/out of the bake viewport and the
+## sprite carrying the baked texture is created/removed along with it
+func _rebuild_text_bake() -> void:
+	if Engine.is_editor_hint():
+		return
+	# If the Label lies inside the bake viewport, bring it back under the button first
+	if _text_label and is_instance_valid(_text_label) and _text_label.get_parent() != self:
+		var owner_node = _text_label.get_parent()
+		owner_node.remove_child(_text_label)
+		add_child(_text_label, false, Node.INTERNAL_MODE_BACK)
+	if _text_bake_sprite and is_instance_valid(_text_bake_sprite):
+		_text_bake_sprite.queue_free()
+	_text_bake_sprite = null
+	if _text_viewport and is_instance_valid(_text_viewport):
+		_text_viewport.queue_free()
+	_text_viewport = null
+	if not text_bake_preview or _text_label == null or not is_instance_valid(_text_label):
+		_reset_text_rect()
+		_update_text_position()
+		return
+	# Bake viewport: an offscreen canvas rendering the Label, transparent_bg keeps a clean base
+	var viewport := SubViewport.new()
+	viewport.name = "TextBakeViewport"
+	viewport.transparent_bg = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(viewport, false, Node.INTERNAL_MODE_BACK)
+	_text_viewport = viewport
+	# Move the Label into the viewport; zero the anchors, layout/size handled at bake time
+	if _text_label.get_parent() == self:
+		remove_child(_text_label)
+	_text_viewport.add_child(_text_label)
+	_text_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_text_label.position = Vector2.ZERO
+	# The sprite that carries the baked texture with the 3D-preview shader
+	# (its follow uniform is driven by _process/_reset_mouse_follow)
+	var sprite := Sprite2D.new()
+	sprite.name = "Text3D"
+	sprite.set_meta("plugin_created", true)
+	sprite.centered = true
+	sprite.z_index = 1
+	add_child(sprite, false, Node.INTERNAL_MODE_BACK)
+	_text_bake_sprite = sprite
+	var material := ShaderMaterial.new()
+	material.shader = preset_shader_list[1]
+	sprite.material = material
+	_queue_text_bake()
+
+
+## De-duplicated deferred bakes (text, style and button-size changes all trigger it)
+func _queue_text_bake() -> void:
+	if Engine.is_editor_hint() or not text_bake_preview or _text_viewport == null:
+		return
+	if _text_bake_queued:
+		return
+	_text_bake_queued = true
+	_bake_text.call_deferred()
+
+
+func _bake_text() -> void:
+	_text_bake_queued = false
+	if not text_bake_preview or _text_viewport == null or not is_instance_valid(_text_viewport):
+		return
+	if _text_label == null or not is_instance_valid(_text_label) or _text_bake_sprite == null or not is_instance_valid(_text_bake_sprite):
+		return
+	# If the Label is still under the button (e.g. created mid-bake), move it into the viewport
+	if _text_label.get_parent() == self:
+		remove_child(_text_label)
+		_text_viewport.add_child(_text_label)
+		_text_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		_text_label.position = Vector2.ZERO
+	if _text_label.get_parent() != _text_viewport:
+		return
+	var size_i := Vector2i(maxi(1, int(ceil(size.x))), maxi(1, int(ceil(size.y))))
+	_text_viewport.size = size_i
+	var inner := Vector2(maxi(1, size_i.x - text_bake_margin * 2), maxi(1, size_i.y - text_bake_margin * 2))
+	_text_label.position = Vector2(text_bake_margin, text_bake_margin)
+	_text_label.size = inner
+	_text_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	await RenderingServer.frame_post_draw
+	if not text_bake_preview or _text_viewport == null or not is_instance_valid(_text_viewport):
+		return
+	var texture := _text_viewport.get_texture()
+	if texture == null:
+		return
+	_text_bake_sprite.texture = texture
+	# Center the sprite over the button so the baked texture maps onto it one to one
+	_text_bake_sprite.position = Vector2(size) / 2.0
+	_text_bake_sprite.material.set_shader_parameter(mouse_uniform_name, _text_bake_sprite.global_position)
 
 
 func _update_text_shadow() -> void:
@@ -652,6 +779,7 @@ func _update_text_shadow() -> void:
 	else:
 		# Transparent shadow color clears the shadow when disabled
 		_text_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
+	_queue_text_bake()
 
 
 func _update_text_color() -> void:
@@ -671,6 +799,7 @@ func _apply_text_style() -> void:
 	_text_label.add_theme_color_override("font_outline_color", text_outline_color)
 	_text_label.add_theme_constant_override("outline_size", text_outline_size)
 	_update_text_shadow()
+	_queue_text_bake()
 
 
 func _current_shader() -> Shader:
@@ -823,6 +952,9 @@ func _on_pressed() -> void:
 
 func _play_text_move(down: bool) -> void:
 	if _text_label == null or not is_instance_valid(_text_label):
+		return
+	if text_bake_preview and not Engine.is_editor_hint():
+		# Baked mode keeps the bake source stable — text animations do not move the Label
 		return
 	if _text_tween and is_instance_valid(_text_tween):
 		_text_tween.kill()
