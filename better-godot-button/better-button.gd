@@ -184,7 +184,7 @@ class_name BetterButton
 # Text 3D preview: bake the text Label into a texture via SubViewport and mount it on a sprite
 # with the 3D-preview shader. Attaching the shader to a Label does nothing — glyph UVs are
 # sub-rects of the font atlas, so the shader's offset degenerates to identity.
-# Runtime only: in the editor the plain Label keeps showing; in baked mode text press-move
+# Works in the editor and at runtime; in baked mode text press-move
 # and hover color animations have no effect.
 @export var text_bake_preview: bool = false:
 	set(value):
@@ -651,7 +651,7 @@ func _reset_text_rect() -> void:
 	# offsets and never recovers, so any size change has to redo this
 	if _text_label == null or not is_instance_valid(_text_label):
 		return
-	if text_bake_preview and not Engine.is_editor_hint():
+	if text_bake_preview:
 		# In baked mode the text is drawn into the SubViewport: layout and re-bake are the
 		# bake logic's job
 		_queue_text_bake()
@@ -671,7 +671,7 @@ func _reset_text_rect() -> void:
 func _update_text_position() -> void:
 	if _text_label == null or not is_instance_valid(_text_label):
 		return
-	if text_bake_preview and not Engine.is_editor_hint():
+	if text_bake_preview:
 		# Baked mode keeps the bake source stable — text animations do not move the Label
 		return
 	if _text_tween and is_instance_valid(_text_tween):
@@ -682,8 +682,6 @@ func _update_text_position() -> void:
 ## Turn bake mode on/off: the text Label moves into/out of the bake viewport and the
 ## sprite carrying the baked texture is created/removed along with it
 func _rebuild_text_bake() -> void:
-	if Engine.is_editor_hint():
-		return
 	# If the Label lies inside the bake viewport, bring it back under the button first
 	if _text_label and is_instance_valid(_text_label) and _text_label.get_parent() != self:
 		var owner_node = _text_label.get_parent()
@@ -729,7 +727,7 @@ func _rebuild_text_bake() -> void:
 
 ## De-duplicated deferred bakes (text, style and button-size changes all trigger it)
 func _queue_text_bake() -> void:
-	if Engine.is_editor_hint() or not text_bake_preview or _text_viewport == null:
+	if not text_bake_preview or _text_viewport == null:
 		return
 	if _text_bake_queued:
 		return
@@ -751,11 +749,15 @@ func _bake_text() -> void:
 		_text_label.position = Vector2.ZERO
 	if _text_label.get_parent() != _text_viewport:
 		return
-	var size_i := Vector2i(maxi(1, int(ceil(size.x))), maxi(1, int(ceil(size.y))))
+	# Bake viewport sizes to the label's minimum size plus margins all around — never the
+	# button size, so long text and outlines aren't clipped by the viewport
+	var inner: Vector2 = _text_label.get_combined_minimum_size()
+	inner = Vector2(maxf(1.0, inner.x), maxf(1.0, inner.y))
+	var outer: Vector2 = inner + Vector2(text_bake_margin * 2.0, text_bake_margin * 2.0)
+	var size_i := Vector2i(maxi(1, int(ceil(outer.x))), maxi(1, int(ceil(outer.y))))
 	_text_viewport.size = size_i
-	var inner := Vector2(maxi(1, size_i.x - text_bake_margin * 2), maxi(1, size_i.y - text_bake_margin * 2))
-	_text_label.position = Vector2(text_bake_margin, text_bake_margin)
 	_text_label.size = inner
+	_text_label.position = Vector2(text_bake_margin, text_bake_margin)
 	_text_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	await RenderingServer.frame_post_draw
 	if not text_bake_preview or _text_viewport == null or not is_instance_valid(_text_viewport):
@@ -953,7 +955,7 @@ func _on_pressed() -> void:
 func _play_text_move(down: bool) -> void:
 	if _text_label == null or not is_instance_valid(_text_label):
 		return
-	if text_bake_preview and not Engine.is_editor_hint():
+	if text_bake_preview:
 		# Baked mode keeps the bake source stable — text animations do not move the Label
 		return
 	if _text_tween and is_instance_valid(_text_tween):

@@ -180,7 +180,7 @@ class_name 更好的按钮
 
 # 文本3D预览：把文本 Label 用 SubViewport 烘焙成纹理，挂到带 3D预览 shader 的精灵上
 # Label 直接挂 3D shader 无效——文字 UV 是字形图集里的子矩形，shader 的偏移恒等于零
-# 只在运行时生效：编辑器里仍是普通 Label；烘焙模式下 文本下移/悬停变色 等文字动画不起作用
+# 编辑器与运行时都生效；烘焙模式下 文本下移/悬停变色 等文字动画不起作用
 @export var 文本烘焙预览: bool = false:
 	set(值):
 		文本烘焙预览 = 值
@@ -642,7 +642,7 @@ func _复位文本矩形() -> void:
 	# Godot 会把最小尺寸钳进 offsets 且之后不会自行恢复，所以尺寸一变就得重来
 	if _文本标签 == null or not is_instance_valid(_文本标签):
 		return
-	if 文本烘焙预览 and not Engine.is_editor_hint():
+	if 文本烘焙预览:
 		# 烘焙模式下文本画进 SubViewport：Label 摆放与重烘由烘焙逻辑管理
 		_排队烘焙文本()
 		return
@@ -661,7 +661,7 @@ func _复位文本矩形() -> void:
 func _刷新文本位置() -> void:
 	if _文本标签 == null or not is_instance_valid(_文本标签):
 		return
-	if 文本烘焙预览 and not Engine.is_editor_hint():
+	if 文本烘焙预览:
 		# 烘焙模式下文本动画不动 Label（烘焙源保持稳定）
 		return
 	if _文本动画 and is_instance_valid(_文本动画):
@@ -670,9 +670,8 @@ func _刷新文本位置() -> void:
 
 
 ## 打开/关闭烘焙模式：文本 Label 移入/移出烘焙视口，承载纹理的 3D 精灵随之建撤
+## 编辑器与运行时都可用（编辑器里即时预览烘焙效果）
 func _重建文本烘焙() -> void:
-	if Engine.is_editor_hint():
-		return
 	# Label 若躺在烘焙视口里，先接回按钮
 	if _文本标签 and is_instance_valid(_文本标签) and _文本标签.get_parent() != self:
 		var 父节点 = _文本标签.get_parent()
@@ -717,7 +716,7 @@ func _重建文本烘焙() -> void:
 
 ## 队列去重后延帧烘焙（改字、改样式、按钮尺寸变化都会触发）
 func _排队烘焙文本() -> void:
-	if Engine.is_editor_hint() or not 文本烘焙预览 or _文本视口 == null:
+	if not 文本烘焙预览 or _文本视口 == null:
 		return
 	if _文本烘焙已排队:
 		return
@@ -739,11 +738,14 @@ func _执行文本烘焙() -> void:
 		_文本标签.position = Vector2.ZERO
 	if _文本标签.get_parent() != _文本视口:
 		return
-	var 尺寸 := Vector2i(maxi(1, int(ceil(size.x))), maxi(1, int(ceil(size.y))))
+	# 烘焙视口按 文本最小尺寸+四周边距 自适应：不用按钮尺寸，防止长字/描边被视口裁掉
+	var 内尺寸: Vector2 = _文本标签.get_combined_minimum_size()
+	内尺寸 = Vector2(maxf(1.0, 内尺寸.x), maxf(1.0, 内尺寸.y))
+	var 外尺寸: Vector2 = 内尺寸 + Vector2(文本烘焙边距 * 2.0, 文本烘焙边距 * 2.0)
+	var 尺寸 := Vector2i(maxi(1, int(ceil(外尺寸.x))), maxi(1, int(ceil(外尺寸.y))))
 	_文本视口.size = 尺寸
-	var 内尺寸 := Vector2(maxi(1, 尺寸.x - 文本烘焙边距 * 2), maxi(1, 尺寸.y - 文本烘焙边距 * 2))
-	_文本标签.position = Vector2(文本烘焙边距, 文本烘焙边距)
 	_文本标签.size = 内尺寸
+	_文本标签.position = Vector2(文本烘焙边距, 文本烘焙边距)
 	_文本视口.render_target_update_mode = SubViewport.UPDATE_ONCE
 	await RenderingServer.frame_post_draw
 	if not 文本烘焙预览 or _文本视口 == null or not is_instance_valid(_文本视口):
@@ -752,7 +754,7 @@ func _执行文本烘焙() -> void:
 	if 纹理 == null:
 		return
 	_文本3D图案.texture = 纹理
-	# 精灵覆盖按钮居中：烘焙视口比按钮大了一圈边距，纹理中央对齐文字
+	# 精灵以按钮中心为轴居中：视口比文字大一圈边距，纹理中心即文字中心
 	_文本3D图案.position = Vector2(size) / 2.0
 	_文本3D图案.material.set_shader_parameter(鼠标跟随参数名, _文本3D图案.global_position)
 
@@ -943,7 +945,7 @@ func _on_pressed() -> void:
 func _播放文本下移(下移: bool) -> void:
 	if _文本标签 == null or not is_instance_valid(_文本标签):
 		return
-	if 文本烘焙预览 and not Engine.is_editor_hint():
+	if 文本烘焙预览:
 		# 烘焙模式下文本动画不动 Label（烘焙源保持稳定）
 		return
 	if _文本动画 and is_instance_valid(_文本动画):
