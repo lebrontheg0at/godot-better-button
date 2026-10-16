@@ -25,6 +25,7 @@ Install only **one** of them — copy that folder into your project's `addons/` 
 - 📐 **One-click size match** — tick `match_texture_size` and the node (plus its minimum size) fits the texture
 - 🌑 **Quick shadow** — one checkbox: a state-following darkened copy of the base texture, auto-managed
 - ✍️ **Auto text** — auto-created label with font/size/color/outline/drop-shadow, hover color change, and press-move-down
+- ↔️ **Text alignment** — horizontal (left/center/right/fill) and vertical (top/center/bottom) alignment inside the button
 - 🧊 **Text bake preview** — optionally bakes the text label into a texture via a SubViewport and renders it through the 3D-preview shader, so pure-text buttons get a real 3D tilt (direct shader on a Label is a no-op because glyph UVs live in the font atlas; works in the editor too)
 - 🎞️ **14 animation presets** — hover grow, press shrink, click shake, click bounce, offset sway, hop, rotation sway, vibration, blink, color flash, heartbeat, squash & stretch, nod, sink; each expandable with its own trigger checkboxes and parameters
 - 🔤 **Built-in shaders** — outline (with hover-only mode) and 3D-preview presets, no manual file dragging
@@ -64,7 +65,7 @@ After adding the node, every feature is an inspector option and everything is op
 | Texture | Normal/hover/pressed slots (auto-centered), per-state sprite params (`normal_params` / `hover_params` / `pressed_params`), extra layers via `texture_layers`, and a `match_texture_size` checkbox |
 | Shadow | State-following shadow; offset (5,5) and 50% opacity by default |
 | Animation | 14 presets, each with hover/press/click triggers and parameters |
-| Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down (switchable), optional text bake preview (visible in the editor) |
+| Text | Auto label: content, font, size, color, outline, shadow, hover color, press move-down (switchable), h/v alignment, optional text bake preview (visible in the editor) |
 | Outline | Built-in outline shader, optional hover-only mode |
 | Sound | Hover/press audio slots + independent volumes |
 | Shader | 3D-preview preset (mouse-follow) or custom shader |

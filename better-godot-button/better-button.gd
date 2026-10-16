@@ -163,6 +163,16 @@ class_name BetterButton
 	set(value):
 		text_shadow_offset = value
 		_update_text_shadow()
+# Horizontal text alignment inside the button: left / center / right / fill
+@export_enum("Left", "Center", "Right", "Fill") var text_h_align: int = 1:
+	set(value):
+		text_h_align = value
+		_apply_text_align()
+# Vertical text alignment inside the button: top / center / bottom
+@export_enum("Top", "Center", "Bottom") var text_v_align: int = 1:
+	set(value):
+		text_v_align = value
+		_apply_text_align()
 
 # Text label moves down while pressed, restores on release; turn the switch off instead of
 # zeroing text_press_offset_y
@@ -661,11 +671,18 @@ func _reset_text_rect() -> void:
 	_text_label.offset_top = 0.0
 	_text_label.offset_right = 0.0
 	_text_label.offset_bottom = 0.0
-	_text_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_apply_text_align()
 	_text_label.z_index = 1
 	_text_origin = _text_label.position
 	_update_text_position()
+
+
+## Write the exported alignment options onto the Label (editor and runtime alike)
+func _apply_text_align() -> void:
+	if _text_label == null or not is_instance_valid(_text_label):
+		return
+	_text_label.horizontal_alignment = text_h_align as HorizontalAlignment
+	_text_label.vertical_alignment = text_v_align as VerticalAlignment
 
 
 func _update_text_position() -> void:
