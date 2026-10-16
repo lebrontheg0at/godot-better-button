@@ -161,6 +161,16 @@ class_name 更好的按钮
 	set(值):
 		文本阴影偏移 = 值
 		_更新文本阴影()
+# 文本在按钮内的水平对齐：左/居中/右/两端对齐（填充）
+@export_enum("左对齐", "居中", "右对齐", "两端对齐") var 文本水平对齐: int = 1:
+	set(值):
+		文本水平对齐 = 值
+		_应用文本对齐()
+# 文本在按钮内的垂直对齐：上/居中/下
+@export_enum("上对齐", "居中", "下对齐") var 文本垂直对齐: int = 1:
+	set(值):
+		文本垂直对齐 = 值
+		_应用文本对齐()
 
 # 按下时文本 Label 下移，松开复位；不想要下移就关掉开关，不用把 文本下移距离 调成 0
 @export var 文本偏移: Vector2 = Vector2.ZERO:
@@ -651,11 +661,18 @@ func _复位文本矩形() -> void:
 	_文本标签.offset_top = 0.0
 	_文本标签.offset_right = 0.0
 	_文本标签.offset_bottom = 0.0
-	_文本标签.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_文本标签.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_应用文本对齐()
 	_文本标签.z_index = 1
 	_文本原始位置 = _文本标签.position
 	_刷新文本位置()
+
+
+## 把导出的对齐选项写进 Label（编辑器与运行时都生效）
+func _应用文本对齐() -> void:
+	if _文本标签 == null or not is_instance_valid(_文本标签):
+		return
+	_文本标签.horizontal_alignment = 文本水平对齐 as HorizontalAlignment
+	_文本标签.vertical_alignment = 文本垂直对齐 as VerticalAlignment
 
 
 func _刷新文本位置() -> void:
