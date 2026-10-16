@@ -766,10 +766,12 @@ func _bake_text() -> void:
 		_text_label.position = Vector2.ZERO
 	if _text_label.get_parent() != _text_viewport:
 		return
-	# Bake viewport sizes to the label's minimum size plus margins all around — never the
-	# button size, so long text and outlines aren't clipped by the viewport
-	var inner: Vector2 = _text_label.get_combined_minimum_size()
-	inner = Vector2(maxf(1.0, inner.x), maxf(1.0, inner.y))
+	# Bake viewport takes max(text minimum size, button size) plus margins:
+	#  - max() gives horizontal/vertical alignment room to work (a viewport exactly the size
+	#    of the text makes alignment a no-op)
+	#  - never smaller than the text, so long text and outlines aren't clipped
+	var text_size: Vector2 = _text_label.get_combined_minimum_size()
+	var inner: Vector2 = Vector2(maxf(maxf(1.0, text_size.x), size.x), maxf(maxf(1.0, text_size.y), size.y))
 	var outer: Vector2 = inner + Vector2(text_bake_margin * 2.0, text_bake_margin * 2.0)
 	var size_i := Vector2i(maxi(1, int(ceil(outer.x))), maxi(1, int(ceil(outer.y))))
 	_text_viewport.size = size_i

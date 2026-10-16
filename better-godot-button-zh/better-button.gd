@@ -755,9 +755,11 @@ func _执行文本烘焙() -> void:
 		_文本标签.position = Vector2.ZERO
 	if _文本标签.get_parent() != _文本视口:
 		return
-	# 烘焙视口按 文本最小尺寸+四周边距 自适应：不用按钮尺寸，防止长字/描边被视口裁掉
-	var 内尺寸: Vector2 = _文本标签.get_combined_minimum_size()
-	内尺寸 = Vector2(maxf(1.0, 内尺寸.x), maxf(1.0, 内尺寸.y))
+	# 烘焙视口取 max(文本最小尺寸, 按钮尺寸) + 四周边距：
+	#  - 取 max 才能让 水平/垂直对齐 有可对齐的余量（视口等于文字大小时对齐是空操作）
+	#  - 不小于文本最小尺寸，长字/描边不会被裁掉
+	var 文字尺寸: Vector2 = _文本标签.get_combined_minimum_size()
+	var 内尺寸: Vector2 = Vector2(maxf(maxf(1.0, 文字尺寸.x), size.x), maxf(maxf(1.0, 文字尺寸.y), size.y))
 	var 外尺寸: Vector2 = 内尺寸 + Vector2(文本烘焙边距 * 2.0, 文本烘焙边距 * 2.0)
 	var 尺寸 := Vector2i(maxi(1, int(ceil(外尺寸.x))), maxi(1, int(ceil(外尺寸.y))))
 	_文本视口.size = 尺寸
