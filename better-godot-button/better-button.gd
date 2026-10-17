@@ -333,13 +333,15 @@ func _reset_mouse_follow() -> void:
 
 
 func _init_animations() -> void:
-	# Fill unset animations with defaults (default: hover grow + press shrink on, rest off)
+	# Fill unset animations with defaults (default: hover grow + press shrink + click bounce on, rest off)
 	if hover_grow == null:
 		hover_grow = HoverGrowAnimation.new()
 	if press_shrink == null:
 		press_shrink = PressShrinkAnimation.new()
 	if click_shake == null:
 		click_shake = ClickShakeAnimation.new()
+		# unconfigured shake must not fire: the class defaults play_on_click to true
+		click_shake.play_on_click = false
 	if click_bounce == null:
 		click_bounce = ClickBounceAnimation.new()
 	if sway_offset == null:
