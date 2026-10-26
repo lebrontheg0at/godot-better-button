@@ -15,7 +15,9 @@ func _exit_tree() -> void:
 	remove_custom_type("Better Button")
 
 
-## Tint the built-in editor icon (multiply color, keep alpha) into a standalone texture; fall back to the original on failure
+## Grayscale the built-in editor icon first, then map luminance to the tint color (keep alpha); fall back to the original on failure.
+## Desaturation is required: the editor theme recolors built-in icons (a gray-green theme turns a plain multiply into muddy gray-green),
+## so normalizing by luminance keeps the icon color stable regardless of the user's theme.
 func _make_tinted_icon(icon_name: String, tint: Color) -> Texture2D:
 	var base_icon: Texture2D = EditorInterface.get_editor_theme().get_icon(icon_name, "EditorIcons")
 	var img := base_icon.get_image()
@@ -27,8 +29,9 @@ func _make_tinted_icon(icon_name: String, tint: Color) -> Texture2D:
 	for y in img.get_height():
 		for x in img.get_width():
 			var c := img.get_pixel(x, y)
-			c.r *= tint.r
-			c.g *= tint.g
-			c.b *= tint.b
+			var lum := c.r * 0.299 + c.g * 0.587 + c.b * 0.114
+			c.r = tint.r * lum
+			c.g = tint.g * lum
+			c.b = tint.b * lum
 			img.set_pixel(x, y, c)
 	return ImageTexture.create_from_image(img)
