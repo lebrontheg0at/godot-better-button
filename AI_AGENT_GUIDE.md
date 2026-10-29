@@ -74,7 +74,7 @@ script = ExtResource("1")
 动画配置以 sub_resource 挂在节点属性上：
 
 ```ini
-[ext_resource type="Script" path="res://addons/better-godot-button/动画配置/悬停放大动画.gd" id="2_afd"]
+[ext_resource type="Script" path="res://addons/godot_better_button/better-godot-button-zh/animations/hover-grow-animation.gd" id="2_afd"]
 
 [sub_resource type="Resource" id="Resource_anim1"]
 script = ExtResource("2_afd")

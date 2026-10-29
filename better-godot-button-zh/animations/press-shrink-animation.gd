@@ -1,6 +1,6 @@
 @tool
 extends 按钮动画基类
-class_name 按下缩小动画
+class_name 缩小动画
 
 # 悬停/按下/点击时缩小按钮
 

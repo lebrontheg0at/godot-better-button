@@ -1,6 +1,6 @@
 @tool
 extends 按钮动画基类
-class_name 点击抖动动画
+class_name 抖动动画
 
 # 悬停/按下/点击时左右旋转抖动按钮
 

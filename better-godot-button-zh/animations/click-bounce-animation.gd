@@ -1,6 +1,6 @@
 @tool
 extends 按钮动画基类
-class_name 点击弹跳动画
+class_name 弹跳动画
 
 # 悬停/按下/点击时弹跳按钮（先弹大再弹回）
 

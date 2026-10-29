@@ -1,6 +1,6 @@
 @tool
 extends 按钮动画基类
-class_name 悬停放大动画
+class_name 放大动画
 
 # 悬停/按下/点击时放大按钮
 
